@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quarterly Planning Workflow — Q3/26</title>
+  <link rel="stylesheet" href="../../icarus/tokens.css" />
+  <link rel="stylesheet" href="../../icarus/semantic.css" />
+  <link rel="stylesheet" href="../../icarus/components.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+  <style>
+    /* ── Full-viewport app shell ── */
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+
+    .shell-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .app-shell-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* ── Page header ── */
+    .wf-header {
+      flex-shrink: 0;
+      padding: var(--ic-space-5) var(--ic-space-5) 0;
+      background: var(--color-surface);
+    }
+
+    .wf-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: var(--ic-space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .wf-title-row h1 {
+      font: var(--type-h2);
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .wf-title-actions { display: flex; gap: var(--ic-space-2); align-items: center; }
+
+    .btn-generate {
+      background: #00cc83;
+      color: #fff;
+      border: none;
+      border-radius: var(--ic-radius-sm);
+      padding: 0 var(--ic-space-4);
+      height: 32px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--ic-duration-fast) var(--ic-ease);
+    }
+    .btn-generate:hover { background: #00b574; }
+
+    .wf-subtitle {
+      padding: var(--ic-space-2) 0 var(--ic-space-4);
+      font: var(--type-body);
+      color: var(--color-text-muted);
+    }
+    .wf-subtitle strong { color: var(--color-text); font-weight: 600; }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .tab-panel[hidden] { display: none; }
+
+    .placeholder-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ic-space-3);
+      color: var(--color-text-muted);
+      font: var(--type-body-sm);
+    }
+    .placeholder-view i { font-size: 40px; opacity: 0.3; }
+
+    /* ── Workflow area ── */
+    .workflow-area {
+      flex: 1;
+      overflow: auto;
+      padding: 0 var(--ic-space-5) var(--ic-space-5);
+    }
+
+    .workflow-grid {
+      position: relative;
+      min-width: 1100px;
+    }
+
+    /* ── Swimlane rows ── */
+    .swimlane-row {
+      display: flex;
+      min-height: 192px;
+      position: relative;
+    }
+    .swimlane-row--cross-functional { background: rgba(229,156,1,0.04); }
+    .swimlane-row--function-director { background: rgba(37,169,239,0.04); }
+    .swimlane-row--subfunctions      { background: rgba(32,78,207,0.04); }
+
+    .swimlane-label {
+      width: 28px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swimlane-label-inner {
+      transform: rotate(-90deg);
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      padding: 0 var(--ic-space-2);
+      width: 192px;
+    }
+
+    .swimlane-label--cross-functional .swimlane-label-inner { background: #e59c01; }
+    .swimlane-label--function-director .swimlane-label-inner { background: #25a9ef; }
+    .swimlane-label--subfunctions      .swimlane-label-inner { background: #204ecf; }
+
+    /* ── Card grid ── */
+    .swimlane-cards {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 320px 320px;
+      column-gap: 48px;
+      row-gap: 0;
+      padding: 24px 24px 24px 36px;
+      align-content: start;
+    }
+
+    /* ── Step card ── */
+    .step-card {
+      position: relative;
+      background: #fff;
+      border-radius: 6px;
+      border-left: 3px solid var(--_bc, var(--color-border));
+      box-shadow: 0 0 4px rgba(0,0,0,0.08);
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: box-shadow var(--ic-duration-fast) var(--ic-ease),
+                  transform var(--ic-duration-fast) var(--ic-ease);
+      outline: none;
+    }
+    .step-card:hover  { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-1px); }
+    .step-card:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+    .step-card.is-selected { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+    .step-card.drag-over   { outline: 2px dashed var(--color-accent); outline-offset: 2px; }
+
+    .step-card--north-star       { background: #f3f4f6; --_bc: #191e28; }
+    .step-card--cross-functional { --_bc: #e59c01; }
+    .step-card--cross-functional-done {
+      background: linear-gradient(#fff8, #fff8), linear-gradient(#eafbf5, #eafbf5);
+      --_bc: #03b080;
+    }
+    .step-card--function-director { --_bc: #25a9ef; }
+    .step-card--subfunctions      { --_bc: #204ecf; }
+
+    /* Drag handle */
+    .drag-handle {
+      flex-shrink: 0;
+      opacity: 0.4;
+      padding-top: 2px;
+      cursor: grab;
+      color: var(--color-text-muted);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* Card content */
+    .card-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-description {
+      font-size: 12px;
+      line-height: 18px;
+      color: #191e28;
+      margin: 0;
+    }
+
+    /* Assignee row */
+    .card-assignee {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px;
+      border-radius: var(--ic-radius-sm);
+      background: #ebeced;
+    }
+
+    .card-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #c8d0df;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #455065;
+      flex-shrink: 0;
+    }
+
+    .card-assignee-name { font-size: 12px; color: #191e28; }
+
+    /* Step detail footer */
+    .card-details {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 2px;
+    }
+
+    .card-detail-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+      color: #455065;
+    }
+
+    /* Step number badge */
+    .step-badge {
+      position: absolute;
+      top: -12px;
+      left: -14px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #191e28;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .step-badge--green { background: #03b080; }
+
+    /* ── SVG connectors overlay ── */
+    .wf-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ── Step detail drawer ── */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: var(--ic-z-overlay);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+    }
+
+    .drawer-panel {
+      position: relative;
+      width: 480px;
+      max-width: 90vw;
+      background: var(--color-surface);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--ic-shadow-xl);
+      animation: slide-in var(--ic-duration-base) var(--ic-ease-out);
+    }
+
+    @keyframes slide-in {
+      from { transform: translateX(32px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    .drawer-head {
+      padding: var(--ic-space-5);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--ic-space-5);
+    }
+
+    .drawer-foot {
+      padding: var(--ic-space-4) var(--ic-space-5);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--ic-space-2);
+      flex-shrink: 0;
+    }
+
+    .drawer-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--ic-space-3);
+      margin-bottom: var(--ic-space-5);
+    }
+
+    .drawer-stat {
+      background: var(--color-surface-muted);
+      border-radius: var(--ic-radius-sm);
+      padding: var(--ic-space-3);
+      text-align: center;
+    }
+
+    .drawer-stat-value { font: var(--type-h3); color: var(--color-text); margin: 0; }
+    .drawer-stat-label { font: var(--type-caption); color: var(--color-text-muted); margin: 0; }
+
+    .drawer-section { margin-bottom: var(--ic-space-5); }
+    .drawer-section h3 { font: var(--type-h4); color: var(--color-text); margin: 0 0 var(--ic-space-3); }
+
+    /* ── Toast ── */
+    .toast-stack {
+      position: fixed;
+      bottom: var(--ic-space-5);
+      right: var(--ic-space-5);
+      z-index: var(--ic-z-toast);
+      display: flex;
+      flex-direction: column;
+      gap: var(--ic-space-2);
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--color-text);
+      color: var(--color-text-inverse);
+      padding: var(--ic-space-3) var(--ic-space-4);
+      border-radius: var(--ic-radius-md);
+      font: var(--type-body-sm);
+      box-shadow: var(--ic-shadow-lg);
+      display: flex;
+      gap: var(--ic-space-2);
+      align-items: center;
+      animation: toast-in 200ms ease-out;
+    }
+
+    @keyframes toast-in {
+      from { transform: translateY(8px); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════ TOPBAR ════ -->
+  <header class="topbar">
+    <a class="topbar-brand" href="#">
+      <img class="topbar-brand-logo" src="../../icarus/assets/logo.svg" alt="Operationalize" />
+    </a>
+    <div class="topbar-actions">
+      <div class="topbar-search">
+        <svg class="search-icon"><use href="#i-search"/></svg>
+        <input class="topbar-search-input" type="search" placeholder="Search Operationalize…" />
+      </div>
+      <button class="topbar-avatar" type="button" aria-label="Account">RL</button>
+    </div>
+  </header>
+
+  <!-- ════ SHELL BODY ════ -->
+  <div class="shell-body">
+
+    <!-- Sidenav (starts compact) -->
+    <aside class="sidenav is-compact">
+      <button class="sidenav-toggle" type="button" aria-label="Toggle navigation">
+        <svg><use href="#i-chevron-left"/></svg>
+      </button>
+      <ul class="sidenav-list">
+        <li><a class="sidenav-item is-active" href="#"><svg class="sidenav-item-icon"><use href="#i-cycle"/></svg><span class="sidenav-item-label">Processes</span></a></li>
+        <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon"><use href="#i-rocket"/></svg><span class="sidenav-item-label">Initiatives</span></a></li>
+        <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon"><use href="#i-calendar"/></svg><span class="sidenav-item-label">RoB Meetings</span></a></li>
+        <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon"><use href="#i-target"/></svg><span class="sidenav-item-label">OKRs</span></a></li>
+        <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon"><use href="#i-users"/></svg><span class="sidenav-item-label">People</span></a></li>
+        <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon"><use href="#i-org"/></svg><span class="sidenav-item-label">Team</span></a></li>
+      </ul>
+      <div class="sidenav-spacer"></div>
+      <div class="sidenav-footer">
+        <a class="sidenav-item" href="#"><svg class="sidenav-item-icon"><use href="#i-settings"/></svg><span class="sidenav-item-label">Settings</span></a>
+      </div>
+    </aside>
+
+    <!-- ════ MAIN ════ -->
+    <main class="app-shell-main">
+
+      <!-- Page header -->
+      <div class="wf-header">
+        <div class="wf-title-row">
+          <h1>My Function Quarterly Planning Q3/26</h1>
+          <div class="wf-title-actions">
+            <button class="btn btn-secondary" id="btn-back" type="button">
+              <i class="ph ph-arrow-left"></i>&nbsp; Back
+            </button>
+            <button class="btn-generate" id="btn-generate" type="button">Generate schedule</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist" style="margin-top: var(--ic-space-3)">
+          <button class="tab is-active" role="tab" aria-selected="true"
+                  aria-controls="panel-workflow" id="tab-workflow" type="button">Workflow</button>
+          <button class="tab" role="tab" aria-selected="false"
+                  aria-controls="panel-meeting-grid" id="tab-meeting-grid" type="button">Meeting Grid</button>
+          <button class="tab" role="tab" aria-selected="false"
+                  aria-controls="panel-calendar" id="tab-calendar" type="button">Calendar</button>
+        </div>
+
+        <p class="wf-subtitle">
+          <strong>7 steps</strong> · Click on a step card for granular configuration
+        </p>
+      </div><!-- /wf-header -->
+
+      <!-- ── TAB: WORKFLOW ── -->
+      <div id="panel-workflow" class="tab-panel" role="tabpanel" aria-labelledby="tab-workflow">
+        <div class="workflow-area">
+          <div class="workflow-grid" id="wf-grid">
+
+            <!-- SVG connectors rendered by JS -->
+            <svg class="wf-svg" id="wf-svg" aria-hidden="true"></svg>
+
+            <!-- ── ROW 1 · (CROSS-)FUNCTIONAL ── -->
+            <div class="swimlane-row swimlane-row--cross-functional">
+              <div class="swimlane-label swimlane-label--cross-functional">
+                <span class="swimlane-label-inner">(CROSS-)FUNCTIONAL</span>
+              </div>
+              <div class="swimlane-cards">
+
+                <!-- North Star (unnumbered context card) -->
+                <article class="step-card step-card--north-star"
+                         data-step="0" tabindex="0"
+                         aria-label="North Star context card">
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">Business goals and targets for the next quarter are aligned. This sets the "North Star" for the Function.</p>
+                  </div>
+                </article>
+
+                <!-- Step 5 -->
+                <article class="step-card step-card--cross-functional"
+                         data-step="5" tabindex="0" aria-label="Step 5">
+                  <div class="step-badge">5</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">Partner Functions receive goals and OKRs from the Function Directors to confirm the proposed plan.</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item" data-tooltip="Sync status"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item" data-tooltip="Meetings"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item" data-tooltip="Inputs"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item" data-tooltip="Outputs"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item" data-tooltip="Participants"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Step 7 -->
+                <article class="step-card step-card--cross-functional-done"
+                         data-step="7" tabindex="0" aria-label="Step 7">
+                  <div class="step-badge step-badge--green">7</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">The final plan and resource allocations are locked. The plan is shared back with the Function Head and the broader team for execution.</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item" data-tooltip="Sync status"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item" data-tooltip="Meetings"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item" data-tooltip="Inputs"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item" data-tooltip="Outputs"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item" data-tooltip="Participants"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+              </div>
+            </div><!-- /row 1 -->
+
+            <!-- ── ROW 2 · FUNCTION DIRECTOR ── -->
+            <div class="swimlane-row swimlane-row--function-director">
+              <div class="swimlane-label swimlane-label--function-director">
+                <span class="swimlane-label-inner">FUNCTION DIRECTOR</span>
+              </div>
+              <div class="swimlane-cards">
+
+                <!-- Step 1 -->
+                <article class="step-card step-card--function-director"
+                         data-step="1" tabindex="0" aria-label="Step 1">
+                  <div class="step-badge">1</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">The Function leadership team meets with partner Functions to discuss business goals and possible constraints</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Step 4 -->
+                <article class="step-card step-card--function-director"
+                         data-step="4" tabindex="0" aria-label="Step 4">
+                  <div class="step-badge">4</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">Function leaders review the sub-functional OKRs and goals with sub-functions to ensure they're aligned with the overarching strategy.</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Step 6 -->
+                <article class="step-card step-card--function-director"
+                         data-step="6" tabindex="0" aria-label="Step 6">
+                  <div class="step-badge">6</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">Function leadership sync with Sub-functional leads to share the plan, brainstorm and work out initiatives and projects to drive the Sub-functional OKRs</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+              </div>
+            </div><!-- /row 2 -->
+
+            <!-- ── ROW 3 · SUBFUNCTIONS ── -->
+            <div class="swimlane-row swimlane-row--subfunctions">
+              <div class="swimlane-label swimlane-label--subfunctions">
+                <span class="swimlane-label-inner">SUBFUNCTIONS</span>
+              </div>
+              <div class="swimlane-cards">
+
+                <!-- Step 2 -->
+                <article class="step-card step-card--subfunctions"
+                         data-step="2" tabindex="0" aria-label="Step 2">
+                  <div class="step-badge">2</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">Subfunction leads develop OKRs to meet numeric targets based off the business goals received by the Function leadership.</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Step 3 -->
+                <article class="step-card step-card--subfunctions"
+                         data-step="3" tabindex="0" aria-label="Step 3">
+                  <div class="step-badge">3</div>
+                  <div class="drag-handle"><i class="ph ph-dots-six-vertical"></i></div>
+                  <div class="card-content">
+                    <p class="card-description">Sub-function teams develop localized targets and "how-to" plans that make biggest impact on the primary functional OKRs.</p>
+                    <div class="card-assignee">
+                      <div class="card-avatar">AJ</div>
+                      <span class="card-assignee-name">Adan Jones</span>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-detail-item"><i class="ph ph-arrows-left-right"></i></span>
+                      <span class="card-detail-item"><i class="ph ph-calendar-blank"></i>&nbsp;9</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-left"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-arrow-fat-right"></i>&nbsp;6</span>
+                      <span class="card-detail-item"><i class="ph ph-user"></i>&nbsp;8</span>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- empty 3rd column -->
+                <div aria-hidden="true"></div>
+
+              </div>
+            </div><!-- /row 3 -->
+
+          </div><!-- /workflow-grid -->
+        </div><!-- /workflow-area -->
+      </div><!-- /panel-workflow -->
+
+      <!-- ── TAB: MEETING GRID ── -->
+      <div id="panel-meeting-grid" class="tab-panel" role="tabpanel"
+           aria-labelledby="tab-meeting-grid" hidden>
+        <div class="placeholder-view">
+          <i class="ph ph-calendar-blank"></i>
+          <p>Meeting Grid view — coming soon</p>
+        </div>
+      </div>
+
+      <!-- ── TAB: CALENDAR ── -->
+      <div id="panel-calendar" class="tab-panel" role="tabpanel"
+           aria-labelledby="tab-calendar" hidden>
+        <div class="placeholder-view">
+          <i class="ph ph-calendar"></i>
+          <p>Calendar view — coming soon</p>
+        </div>
+      </div>
+
+    </main><!-- /app-shell-main -->
+  </div><!-- /shell-body -->
+
+
+  <!-- ════ STEP DETAIL DRAWER ════ -->
+  <div class="drawer-overlay" id="step-drawer" hidden role="dialog"
+       aria-modal="true" aria-labelledby="drawer-title">
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <div class="drawer-panel">
+
+      <div class="drawer-head">
+        <div>
+          <p class="caption" id="drawer-step-label"
+             style="color:var(--color-text-muted);margin:0 0 4px">Step</p>
+          <h2 class="h3" id="drawer-title" style="margin:0">Step title</h2>
+        </div>
+        <button class="btn btn-icon-only btn-ghost" id="drawer-close"
+                type="button" aria-label="Close drawer">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Stats -->
+        <div class="drawer-stat-row">
+          <div class="drawer-stat">
+            <p class="drawer-stat-value" id="ds-meetings">9</p>
+            <p class="drawer-stat-label">Meetings</p>
+          </div>
+          <div class="drawer-stat">
+            <p class="drawer-stat-value">6</p>
+            <p class="drawer-stat-label">Inputs</p>
+          </div>
+          <div class="drawer-stat">
+            <p class="drawer-stat-value">8</p>
+            <p class="drawer-stat-label">Participants</p>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="drawer-section">
+          <h3>Description</h3>
+          <p class="body-sm" id="ds-description"
+             style="color:var(--color-text-muted);margin:0">–</p>
+        </div>
+
+        <!-- Assignee -->
+        <div class="drawer-section">
+          <h3>Assignee</h3>
+          <div class="card-assignee" style="max-width:260px">
+            <div class="card-avatar">AJ</div>
+            <span class="card-assignee-name">Adan Jones</span>
+          </div>
+        </div>
+
+        <!-- Meeting schedule -->
+        <div class="drawer-section">
+          <h3>Meeting schedule</h3>
+          <div class="stack" style="gap:var(--ic-space-2)">
+            <div class="list-row">
+              <div>
+                <p class="list-row-title">Kick-off</p>
+                <p class="list-row-meta">2 weeks before deadline · 60 min</p>
+              </div>
+              <span class="tag tag-indicator tag-positive">Scheduled</span>
+            </div>
+            <div class="list-row">
+              <div>
+                <p class="list-row-title">Mid-cycle review</p>
+                <p class="list-row-meta">1 week before deadline · 30 min</p>
+              </div>
+              <span class="tag tag-indicator tag-warning">Pending</span>
+            </div>
+            <div class="list-row">
+              <div>
+                <p class="list-row-title">Final alignment</p>
+                <p class="list-row-meta">2 days before deadline · 45 min</p>
+              </div>
+              <span class="tag tag-indicator tag-light">Not scheduled</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Participants -->
+        <div class="drawer-section">
+          <h3>Participants</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--ic-space-2)">
+            <span class="chip">Adan Jones<button class="chip-remove" type="button" aria-label="Remove Adan Jones"><svg><use href="#i-x"/></svg></button></span>
+            <span class="chip">Sarah Kim<button class="chip-remove" type="button" aria-label="Remove Sarah Kim"><svg><use href="#i-x"/></svg></button></span>
+            <span class="chip">Marcus Lee<button class="chip-remove" type="button" aria-label="Remove Marcus Lee"><svg><use href="#i-x"/></svg></button></span>
+            <span class="chip">Elena Romero<button class="chip-remove" type="button" aria-label="Remove Elena Romero"><svg><use href="#i-x"/></svg></button></span>
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div class="drawer-section">
+          <h3>Duration</h3>
+          <label class="field" style="max-width:200px">
+            <input class="input" type="text" value="2 weeks" />
+            <span class="field-hint">Time allocated for this step</span>
+          </label>
+        </div>
+      </div><!-- /drawer-body -->
+
+      <div class="drawer-foot">
+        <button class="btn btn-secondary" id="drawer-cancel" type="button">Cancel</button>
+        <button class="btn btn-primary"   id="drawer-save"   type="button">Save changes</button>
+      </div>
+    </div><!-- /drawer-panel -->
+  </div><!-- /step-drawer -->
+
+
+  <!-- ════ GENERATE SCHEDULE MODAL ════ -->
+  <div class="modal-overlay" id="modal-generate" hidden>
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="h3" style="margin:0">Generate Schedule</h2>
+        <button class="modal-close" type="button" data-modal-close aria-label="Close">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="body-sm" style="color:var(--color-text-muted);margin:0 0 var(--ic-space-3)">
+          Generate a full meeting schedule for all 7 steps of
+          <strong>My Function Quarterly Planning Q3/26</strong>?
+        </p>
+        <p class="body-sm" style="color:var(--color-text-muted);margin:0">
+          This will create calendar invites and assign meeting slots based on each
+          step's configuration and participant availability.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-modal-close type="button">Cancel</button>
+        <button class="btn-generate" id="modal-confirm" type="button"
+                style="height:36px;border-radius:4px">Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-stack" id="toasts"></div>
+
+
+  <!-- ════ ICON SPRITE ════ -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="display:none" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 16 16">
+        <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <line x1="9.5" y1="9.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 16 16">
+        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 16 16">
+        <path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-cycle" viewBox="0 0 16 16">
+        <path d="M2 8a6 6 0 1010.5-4M14 4h-4M10 4v4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="i-rocket" viewBox="0 0 16 16">
+        <path d="M8 2C8 2 12 4 12 8c0 2.5-2 4-2 4L8 14 6 12s-2-1.5-2-4c0-4 4-6 4-6z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+        <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-calendar" viewBox="0 0 16 16">
+        <rect x="2" y="3" width="12" height="11" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <path d="M5 1.5V4M11 1.5V4M2 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-target" viewBox="0 0 16 16">
+        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <circle cx="8" cy="8" r="1" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 16 16">
+        <circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <path d="M1 13c0-2.5 2-4 5-4s5 1.5 5 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M11 4a2 2 0 110 4M14 13c0-2-1.5-3-3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-org" viewBox="0 0 16 16">
+        <rect x="6" y="1" width="4" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <rect x="1" y="10" width="4" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <rect x="11" y="10" width="4" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <path d="M8 4v3M8 7H3v3M8 7h5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 16 16">
+        <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M12.8 3.2l-1.4 1.4M4.6 11.4l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 16 16">
+        <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+
+  <!-- ════ SCRIPT ════ -->
+  <script>
+    // ── Sidenav toggle ──
+    document.querySelectorAll('.sidenav-toggle').forEach(btn => {
+      btn.addEventListener('click', () =>
+        btn.closest('.sidenav').classList.toggle('is-compact'));
+    });
+
+    // ── Tabs ──
+    document.querySelectorAll('.tabs').forEach(tablist => {
+      const tabs = [...tablist.querySelectorAll('.tab')];
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            const active = t === tab;
+            t.classList.toggle('is-active', active);
+            t.setAttribute('aria-selected', String(active));
+            const panel = document.getElementById(t.getAttribute('aria-controls'));
+            if (panel) panel.hidden = !active;
+          });
+        });
+      });
+    });
+
+    // ── Modal open/close ──
+    const OVERLAY = '.modal-overlay';
+    document.querySelectorAll('[data-modal-open]').forEach(t =>
+      t.addEventListener('click', () =>
+        document.getElementById(t.dataset.modalOpen)?.removeAttribute('hidden')));
+    document.addEventListener('click', e => {
+      const closeBtn = e.target.closest('[data-modal-close]');
+      if (closeBtn) { closeBtn.closest(OVERLAY)?.setAttribute('hidden', ''); return; }
+      const overlay = e.target.closest(OVERLAY);
+      if (overlay && e.target === overlay) overlay.hidden = true;
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll(OVERLAY).forEach(o => { if (!o.hidden) o.hidden = true; });
+    });
+
+    // ── Chip remove ──
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.chip-remove');
+      if (btn) btn.closest('.chip')?.remove();
+    });
+
+    // ── Toast ──
+    function toast(msg, ms = 3000) {
+      const el = Object.assign(document.createElement('div'), {
+        className: 'toast',
+        innerHTML: `<i class="ph ph-check-circle"></i> ${msg}`,
+      });
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => el.remove(), ms);
+    }
+
+    // ── Step data ──
+    const STEPS = {
+      0: { label: 'Context',  title: 'North Star',                       desc: 'Business goals and targets for the next quarter are aligned. This sets the "North Star" for the Function.',                                               meetings: 0 },
+      1: { label: 'Step 1',   title: 'Goals & Constraints Alignment',     desc: 'The Function leadership team meets with partner Functions to discuss business goals and possible constraints.',                                            meetings: 9 },
+      2: { label: 'Step 2',   title: 'Sub-Functional OKR Development',    desc: 'Subfunction leads develop OKRs to meet numeric targets based off the business goals received by the Function leadership.',                               meetings: 9 },
+      3: { label: 'Step 3',   title: 'Localized Target Setting',          desc: 'Sub-function teams develop localized targets and "how-to" plans that make biggest impact on the primary functional OKRs.',                               meetings: 9 },
+      4: { label: 'Step 4',   title: 'Sub-Functional OKR Review',         desc: "Function leaders review the sub-functional OKRs and goals with sub-functions to ensure they're aligned with the overarching strategy.",                  meetings: 9 },
+      5: { label: 'Step 5',   title: 'Cross-Functional OKR Confirmation', desc: 'Partner Functions receive goals and OKRs from the Function Directors to confirm the proposed plan.',                                                     meetings: 9 },
+      6: { label: 'Step 6',   title: 'Initiative Planning Sync',          desc: 'Function leadership sync with Sub-functional leads to share the plan, brainstorm and work out initiatives and projects to drive the Sub-functional OKRs.', meetings: 9 },
+      7: { label: 'Step 7',   title: 'Plan Lock & Share',                 desc: 'The final plan and resource allocations are locked. The plan is shared back with the Function Head and the broader team for execution.',                  meetings: 9 },
+    };
+
+    // ── Drawer ──
+    let activeCard = null;
+
+    function openDrawer(card) {
+      const step = parseInt(card.dataset.step, 10);
+      const data = STEPS[step] || {};
+      if (activeCard) activeCard.classList.remove('is-selected');
+      activeCard = card;
+      card.classList.add('is-selected');
+      document.getElementById('drawer-step-label').textContent = data.label || '';
+      document.getElementById('drawer-title').textContent     = data.title || '';
+      document.getElementById('ds-description').textContent   = data.desc  || '';
+      document.getElementById('ds-meetings').textContent      = data.meetings ?? '–';
+      document.getElementById('step-drawer').removeAttribute('hidden');
+    }
+
+    function closeDrawer() {
+      document.getElementById('step-drawer').hidden = true;
+      if (activeCard) { activeCard.classList.remove('is-selected'); activeCard = null; }
+    }
+
+    document.querySelectorAll('.step-card').forEach(card => {
+      card.addEventListener('click',   ()  => openDrawer(card));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(card); }
+      });
+    });
+
+    document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+    document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+    document.getElementById('drawer-cancel').addEventListener('click', closeDrawer);
+    document.getElementById('drawer-save').addEventListener('click', () => {
+      closeDrawer(); toast('Step configuration saved');
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('step-drawer').hidden) closeDrawer();
+    });
+
+    // ── Generate schedule ──
+    document.getElementById('btn-generate').addEventListener('click', () =>
+      document.getElementById('modal-generate').removeAttribute('hidden'));
+    document.getElementById('modal-confirm').addEventListener('click', () => {
+      document.getElementById('modal-generate').hidden = true;
+      toast('Schedule generation started — you\'ll be notified when complete');
+    });
+
+    // ── Back button ──
+    document.getElementById('btn-back').addEventListener('click', () =>
+      toast('Navigating back to Processes…'));
+
+    // ── SVG flow connectors ──
+    function drawConnectors() {
+      const grid = document.getElementById('wf-grid');
+      const svg  = document.getElementById('wf-svg');
+      if (!grid || !svg) return;
+
+      const gr = grid.getBoundingClientRect();
+      svg.innerHTML = `<defs>
+        <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,1 L7,4 L0,7" fill="none" stroke="#c0c8d8" stroke-width="1.5" stroke-linejoin="round"/>
+        </marker>
+      </defs>`;
+
+      const card = n => document.querySelector(`[data-step="${n}"]`);
+
+      function box(n) {
+        const r = card(n)?.getBoundingClientRect();
+        if (!r) return null;
+        return {
+          cx: r.left - gr.left + r.width  / 2,
+          cy: r.top  - gr.top  + r.height / 2,
+          t:  r.top  - gr.top,
+          b:  r.bottom - gr.top,
+          l:  r.left   - gr.left,
+          r:  r.right  - gr.left,
+        };
+      }
+
+      const attr = { stroke: '#c0c8d8', 'stroke-width': '1.5', fill: 'none',
+                     'stroke-linecap': 'round', 'marker-end': 'url(#ah)' };
+
+      function line(d) {
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('d', d);
+        Object.entries(attr).forEach(([k, v]) => p.setAttribute(k, v));
+        svg.appendChild(p);
+      }
+
+      // 1 → 2  (down)
+      const b1 = box(1), b2 = box(2);
+      if (b1 && b2) line(`M${b1.cx},${b1.b} L${b1.cx},${b2.t}`);
+
+      // 2 → 3  (right)
+      const b3 = box(3);
+      if (b2 && b3) line(`M${b2.r},${b2.cy} L${b3.l},${b3.cy}`);
+
+      // 3 → 4  (up, L-shape)
+      const b4 = box(4);
+      if (b3 && b4) line(`M${b3.cx},${b3.t} L${b3.cx},${b4.b}`);
+
+      // 4 → 5  (up)
+      const b5 = box(5);
+      if (b4 && b5) line(`M${b4.cx},${b4.t} L${b4.cx},${b5.b}`);
+
+      // 5 → 6  (right then down: exit right edge, enter top)
+      const b6 = box(6);
+      if (b5 && b6) {
+        const midY = Math.min(b5.b, b6.t) - 16;
+        line(`M${b5.r},${b5.cy} L${b6.cx},${b5.cy} L${b6.cx},${b6.t}`);
+      }
+
+      // 6 → 7  (up)
+      const b7 = box(7);
+      if (b6 && b7) line(`M${b6.cx},${b6.t} L${b6.cx},${b7.b}`);
+    }
+
+    // Draw after fonts/layout settle
+    requestAnimationFrame(() => requestAnimationFrame(drawConnectors));
+    window.addEventListener('resize', drawConnectors);
+
+    // ── Drag-and-drop card reorder ──
+    let dragSrc = null;
+
+    document.querySelectorAll('.step-card').forEach(card => {
+      card.setAttribute('draggable', 'true');
+
+      card.addEventListener('dragstart', e => {
+        dragSrc = card;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => card.style.opacity = '0.4', 0);
+      });
+      card.addEventListener('dragend', () => {
+        card.style.opacity = '';
+        document.querySelectorAll('.step-card').forEach(c => c.classList.remove('drag-over'));
+      });
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (card !== dragSrc) card.classList.add('drag-over');
+      });
+      card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+      card.addEventListener('drop', e => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        if (!dragSrc || dragSrc === card) return;
+        // Swap DOM positions
+        const srcNext  = dragSrc.nextSibling;
+        const destNext = card.nextSibling;
+        card.parentNode.insertBefore(dragSrc, destNext);
+        dragSrc.parentNode.insertBefore(card, srcNext);
+        requestAnimationFrame(drawConnectors);
+        toast('Step order updated');
+      });
+    });
+  </script>
+</body>
+</html>

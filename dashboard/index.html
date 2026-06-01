@@ -1,0 +1,1650 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Summary Dashboard — Finance Q3/26</title>
+  <link rel="stylesheet" href="../../icarus/tokens.css" />
+  <link rel="stylesheet" href="../../icarus/semantic.css" />
+  <link rel="stylesheet" href="../../icarus/components.css" />
+  <style>
+    /* ── Reset & shell ── */
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #f0f1f4; }
+    body { display: flex; flex-direction: column; font-family: var(--ic-font-sans); color: #191e28; }
+    .shell-body { flex: 1; display: flex; overflow: hidden; }
+    .app-shell-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* ── Scrollable content ── */
+    .page-content { flex: 1; overflow-y: auto; padding: 20px 24px 32px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* ══════════════════════════════════════
+       HERO BANNER
+    ══════════════════════════════════════ */
+    .hero {
+      background: linear-gradient(135deg, #1a2333 0%, #262d3d 50%, #1e3045 100%);
+      border-radius: 10px;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* Subtle grid pattern overlay */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .hero-left { position: relative; }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .hero-eyebrow-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #03B080;
+      box-shadow: 0 0 6px rgba(3,176,128,0.7);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; box-shadow: 0 0 6px rgba(3,176,128,0.7); }
+      50% { opacity: 0.6; box-shadow: 0 0 12px rgba(3,176,128,0.4); }
+    }
+
+    .hero-eyebrow-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #03B080;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 2px;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin: 0;
+    }
+
+    .hero-chips {
+      position: relative;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .hero-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px 20px;
+      min-width: 80px;
+    }
+
+    .hero-chip-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .hero-chip-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+
+    .hero-chip-divider {
+      width: 1px; height: 40px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .hero-right {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-generate {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #204ECF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0 16px;
+      height: 36px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-generate:hover { background: #183a9e; }
+    .btn-generate:active { transform: translateY(1px); }
+
+    .btn-secondary-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 0 12px;
+      height: 28px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-secondary-sm:hover { background: rgba(255,255,255,0.13); }
+
+    /* ══════════════════════════════════════
+       PLANNING CYCLE TRACKER
+    ══════════════════════════════════════ */
+    .cycle-tracker {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 28px;
+      flex-shrink: 0;
+    }
+
+    .cycle-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #999ba4;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .cycle-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .cycle-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      gap: 6px;
+      position: relative;
+    }
+
+    .cycle-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 11px;
+      left: calc(50% + 14px);
+      right: calc(-50% + 14px);
+      height: 2px;
+      background: #ebeced;
+      z-index: 0;
+    }
+
+    .cycle-step.done::after { background: #03B080; }
+    .cycle-step.active::after { background: linear-gradient(to right, #204ECF, #ebeced); }
+
+    .cycle-node {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700;
+      position: relative; z-index: 1;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .cycle-step.done .cycle-node {
+      background: #03B080;
+      color: white;
+    }
+
+    .cycle-step.active .cycle-node {
+      background: #204ECF;
+      color: white;
+      box-shadow: 0 0 0 4px rgba(32,78,207,0.2);
+      animation: pulse-step 2s ease-in-out infinite;
+    }
+    @keyframes pulse-step {
+      0%,100% { box-shadow: 0 0 0 4px rgba(32,78,207,0.2); }
+      50% { box-shadow: 0 0 0 6px rgba(32,78,207,0.1); }
+    }
+
+    .cycle-step.future .cycle-node {
+      background: #f0f1f4;
+      color: #999;
+      border: 2px solid #ebeced;
+    }
+
+    .cycle-step-name {
+      font-size: 10px;
+      font-weight: 600;
+      color: #999ba4;
+      text-align: center;
+      max-width: 90px;
+      line-height: 1.3;
+    }
+    .cycle-step.done .cycle-step-name { color: #03B080; }
+    .cycle-step.active .cycle-step-name { color: #204ECF; font-weight: 700; }
+
+    /* ══════════════════════════════════════
+       BENTO GRID
+    ══════════════════════════════════════ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .bento-3  { grid-column: span 3; }
+    .bento-4  { grid-column: span 4; }
+    .bento-5  { grid-column: span 5; }
+    .bento-6  { grid-column: span 6; }
+    .bento-8  { grid-column: span 8; }
+    .bento-12 { grid-column: span 12; }
+
+    /* ── Generic card ── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadein 0.4s ease-out both;
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.2s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.3s; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #999ba4;
+      margin: 0;
+    }
+
+    .card-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .badge-blue { background: #EDF1FD; color: #204ECF; }
+    .badge-green { background: #EAFBF5; color: #03B080; }
+    .badge-yellow { background: #FFF5E3; color: #C08301; }
+
+    /* ── Donut chart card ── */
+    .donut-card-body {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .donut-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 90px; height: 90px;
+    }
+
+    .donut-svg { transform: rotate(-90deg); }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-center-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #191e28;
+      line-height: 1;
+    }
+
+    .donut-center-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+    .donut-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .legend-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .legend-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #455065;
+      flex: 1;
+    }
+
+    .legend-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #191e28;
+    }
+
+    /* ── Initiatives breakdown card ── */
+    .ini-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ini-big-num {
+      font-size: 40px;
+      font-weight: 800;
+      color: #191e28;
+      line-height: 1;
+    }
+
+    .ini-sub-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .ini-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+    .tag-new { background: #EDF1FD; color: #204ECF; }
+    .tag-rollover { background: #191e28; color: #EDF1FD; }
+
+    .ini-derived {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .ini-derived-item {
+      background: #f3f4f6;
+      border-radius: 7px;
+      padding: 8px 10px;
+    }
+
+    .ini-derived-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: #191e28;
+    }
+
+    .ini-derived-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Today's Focus card ── */
+    .today-card {
+      background: linear-gradient(145deg, #f8faff 0%, #fff 100%);
+      border: 1px solid #EDF1FD;
+    }
+
+    .today-timeline { display: flex; flex-direction: column; gap: 0; }
+
+    .today-slot {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      padding: 8px 0;
+      position: relative;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .today-slot:hover { background: rgba(32,78,207,0.04); }
+
+    .today-slot:not(:last-child) .today-slot-line {
+      position: absolute;
+      left: 28px;
+      top: 30px;
+      bottom: -8px;
+      width: 1px;
+      background: #ebeced;
+    }
+
+    .today-time-col {
+      width: 58px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-top: 2px;
+      gap: 2px;
+    }
+
+    .today-time {
+      font-size: 11px;
+      font-weight: 700;
+      color: #455065;
+    }
+
+    .today-ampm {
+      font-size: 9px;
+      color: #999;
+      font-weight: 600;
+    }
+
+    .today-dot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 5px;
+      position: relative;
+    }
+
+    .today-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+      background: white;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+    .today-dot.meeting  { border-color: #204ECF; }
+    .today-dot.done     { background: #03B080; border-color: #03B080; }
+    .today-dot.conflict { border-color: #D42551; }
+
+    .today-content { flex: 1; min-width: 0; }
+
+    .today-meeting-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #191e28;
+      margin: 0 0 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .today-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .today-func-tag {
+      font-size: 10px;
+      font-weight: 600;
+      color: #204ECF;
+      background: #EDF1FD;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .today-duration {
+      font-size: 10px;
+      color: #999;
+    }
+
+    .today-participants {
+      display: flex;
+      margin-left: auto;
+    }
+
+    .mini-avatar {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid white;
+      font-size: 7px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -5px;
+      flex-shrink: 0;
+    }
+    .mini-avatar:first-child { margin-left: 0; }
+
+    .countdown-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #204ECF;
+      color: white;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      align-self: flex-start;
+    }
+    .countdown-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: pulse-dot 1s ease-in-out infinite; }
+
+    /* ── Resources card ── */
+    .resources-big {
+      font-size: 42px;
+      font-weight: 800;
+      color: #191e28;
+      line-height: 1;
+    }
+
+    .resources-unit {
+      font-size: 16px;
+      color: #999;
+      font-weight: 600;
+    }
+
+    .skill-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .skill-chip {
+      font-size: 10px;
+      font-weight: 600;
+      background: #f3f4f6;
+      color: #455065;
+      border-radius: 4px;
+      padding: 3px 7px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .skill-chip-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #D42551;
+    }
+
+    .resource-meter {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .resource-meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 600;
+      color: #455065;
+    }
+
+    .meter-bar-bg {
+      height: 6px;
+      background: #f0f1f4;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .meter-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      animation: bar-grow 1s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+    @keyframes bar-grow {
+      from { width: 0 !important; }
+    }
+    .fill-blue { background: #204ECF; }
+    .fill-green { background: #03B080; }
+    .fill-yellow { background: #E59C01; }
+    .fill-red { background: #D42551; }
+
+    /* ══════════════════════════════════════
+       DETAIL LISTS SECTION
+    ══════════════════════════════════════ */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .list-card { padding: 0; overflow: hidden; }
+
+    .list-card-header {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #f0f1f4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .list-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #191e28;
+    }
+
+    .list-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      background: #f3f4f6;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .list-items { padding: 8px 0; }
+
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 16px;
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    .list-item:hover { background: #f8f9fb; }
+
+    .list-item-icon {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+    .icon-blue { background: #EDF1FD; }
+    .icon-green { background: #EAFBF5; }
+    .icon-purple { background: #F1ECFD; }
+
+    .list-item-icon svg { width: 12px; height: 12px; }
+
+    .list-item-body { flex: 1; min-width: 0; }
+
+    .list-item-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #191e28;
+      line-height: 1.4;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .list-item-meta {
+      font-size: 10px;
+      color: #999;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .list-item-score {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      color: #455065;
+      background: #f3f4f6;
+      padding: 2px 5px;
+      border-radius: 3px;
+      margin-top: 2px;
+    }
+
+    .meeting-time-badge {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .meeting-time-text {
+      font-size: 10px;
+      font-weight: 700;
+      color: #204ECF;
+    }
+
+    .meeting-time-date {
+      font-size: 9px;
+      color: #999;
+    }
+
+    .meeting-today-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #03B080;
+      margin-top: 2px;
+      margin-left: auto;
+    }
+
+    .slack-members {
+      flex-shrink: 0;
+      font-size: 10px;
+      color: #999;
+      margin-top: 3px;
+    }
+
+    .slack-active-dot {
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #03B080;
+      margin-right: 3px;
+    }
+
+    /* ── Misc ── */
+    .view-all {
+      display: block;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #204ECF;
+      padding: 10px;
+      border-top: 1px solid #f0f1f4;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .view-all:hover { background: #f8f9fb; }
+
+    /* page-header tabs */
+    .page-header {
+      flex-shrink: 0;
+      background: white;
+      border-bottom: 1px solid #ebeced;
+      padding: 0 24px;
+    }
+
+    .page-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0 0;
+    }
+
+    .page-header-top h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #191e28;
+      margin: 0;
+    }
+
+    .tabs { display: flex; gap: 0; }
+
+    .tab {
+      padding: 8px 0 9px;
+      margin-right: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #455065;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab.is-active { color: #191e28; border-bottom-color: #204ECF; }
+    .tab:hover:not(.is-active) { color: #191e28; }
+
+    /* sub-sidebar */
+    .workspace { flex: 1; display: flex; overflow: hidden; }
+
+    .sub-sidebar {
+      width: 120px;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      border-right: 1px solid #ebeced;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      overflow-y: auto;
+    }
+
+    .sub-nav {
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #455065;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .sub-nav.is-active { background: #ebeced; color: #191e28; }
+    .sub-nav:hover:not(.is-active) { background: rgba(0,0,0,0.04); }
+  </style>
+</head>
+<body>
+
+<!-- ════ TOPBAR ════ -->
+<header class="topbar">
+  <a class="topbar-brand" href="#">
+    <img class="topbar-brand-logo" src="../../icarus/assets/logo.svg" alt="Operationalize" />
+  </a>
+  <div class="topbar-actions">
+    <div class="topbar-search">
+      <svg class="search-icon" viewBox="0 0 16 16" fill="none">
+        <circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="9.5" y1="9.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input class="topbar-search-input" type="search" placeholder="Search Operationalize…" />
+    </div>
+    <button class="topbar-avatar" type="button">RL</button>
+  </div>
+</header>
+
+<!-- ════ SHELL BODY ════ -->
+<div class="shell-body">
+
+  <!-- Sidenav -->
+  <aside class="sidenav is-compact">
+    <button class="sidenav-toggle" type="button">
+      <svg viewBox="0 0 16 16" fill="none" width="16" height="16">
+        <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <ul class="sidenav-list">
+      <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 1010.5-4M14 4h-4M10 4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sidenav-item-label">Processes</span></a></li>
+      <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2c0 0 4 2 4 6c0 2.5-2 4-2 4L8 14l-2-2s-2-1.5-2-4c0-4 4-6 4-6z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/></svg><span class="sidenav-item-label">Initiatives</span></a></li>
+      <li><a class="sidenav-item is-active" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="2" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="9" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/></svg><span class="sidenav-item-label">Processes</span></a></li>
+      <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg><span class="sidenav-item-label">OKRs</span></a></li>
+      <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M1 13c0-2.5 2-4 5-4s5 1.5 5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sidenav-item-label">People</span></a></li>
+      <li><a class="sidenav-item" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><rect x="6" y="1" width="4" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="10" width="4" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="10" width="4" height="3" rx="0.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 4v3M8 7H3v3M8 7h5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sidenav-item-label">Org</span></a></li>
+    </ul>
+    <div class="sidenav-spacer"></div>
+    <div class="sidenav-footer">
+      <a class="sidenav-item" href="#"><svg class="sidenav-item-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M12.8 3.2l-1.4 1.4M4.6 11.4l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sidenav-item-label">Settings</span></a>
+    </div>
+  </aside>
+
+  <!-- ════ MAIN ════ -->
+  <main class="app-shell-main">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-top">
+        <h1>Finance Quarterly Planning Q3/26</h1>
+        <button class="btn btn-secondary" type="button" style="font-size:12px">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          New
+        </button>
+      </div>
+      <div class="tabs" role="tablist" style="margin-top:4px">
+        <button class="tab" role="tab" type="button">Workflow</button>
+        <button class="tab" role="tab" type="button">Calendar</button>
+        <button class="tab" role="tab" type="button">Drafting Board</button>
+        <button class="tab is-active" role="tab" type="button">Summary</button>
+      </div>
+    </div>
+
+    <!-- Workspace -->
+    <div class="workspace">
+
+      <!-- Sub-sidebar -->
+      <div class="sub-sidebar">
+        <div class="sub-nav">OKRs</div>
+        <div class="sub-nav">Initiatives</div>
+        <div class="sub-nav">Projects</div>
+        <div class="sub-nav">Priorities</div>
+        <div class="sub-nav">Resources</div>
+        <div class="sub-nav is-active">Summary</div>
+      </div>
+
+      <!-- ════ PAGE CONTENT ════ -->
+      <div class="page-content">
+
+        <!-- ── HERO BANNER ── -->
+        <div class="hero">
+          <div class="hero-left">
+            <div class="hero-eyebrow">
+              <div class="hero-eyebrow-dot"></div>
+              <span class="hero-eyebrow-text">Phase 4 of 7 in progress · Sub-Functional OKR Review</span>
+            </div>
+            <h2 class="hero-title">Finance Quarterly Planning Q3/26</h2>
+            <p class="hero-sub">May 26, 2026 · 18 days remaining in planning cycle</p>
+          </div>
+
+          <div class="hero-chips">
+            <div class="hero-chip">
+              <span class="hero-chip-num" data-count="15">15</span>
+              <span class="hero-chip-label">OKRs</span>
+            </div>
+            <div class="hero-chip-divider"></div>
+            <div class="hero-chip">
+              <span class="hero-chip-num" data-count="15">15</span>
+              <span class="hero-chip-label">Initiatives</span>
+            </div>
+            <div class="hero-chip-divider"></div>
+            <div class="hero-chip">
+              <span class="hero-chip-num" data-count="25">25</span>
+              <span class="hero-chip-label">ROB Meetings</span>
+            </div>
+            <div class="hero-chip-divider"></div>
+            <div class="hero-chip">
+              <span class="hero-chip-num" data-count="55">55</span>
+              <span class="hero-chip-label">Ideas</span>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <button class="btn-generate" type="button">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M13 8H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Generate Plan
+            </button>
+            <button class="btn-secondary-sm" type="button">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <!-- ── PLANNING CYCLE TRACKER ── -->
+        <div class="cycle-tracker">
+          <div class="cycle-label">Planning Cycle Progress</div>
+          <div class="cycle-steps">
+
+            <div class="cycle-step done">
+              <div class="cycle-node">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="cycle-step-name">Goals &amp;<br>Constraints</div>
+            </div>
+
+            <div class="cycle-step done">
+              <div class="cycle-node">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="cycle-step-name">Sub-Function<br>OKR Dev</div>
+            </div>
+
+            <div class="cycle-step done">
+              <div class="cycle-node">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="cycle-step-name">Localized<br>Targets</div>
+            </div>
+
+            <div class="cycle-step active">
+              <div class="cycle-node">4</div>
+              <div class="cycle-step-name">OKR<br>Review</div>
+            </div>
+
+            <div class="cycle-step future">
+              <div class="cycle-node">5</div>
+              <div class="cycle-step-name">Cross-Functional<br>Confirm</div>
+            </div>
+
+            <div class="cycle-step future">
+              <div class="cycle-node">6</div>
+              <div class="cycle-step-name">Initiative<br>Planning</div>
+            </div>
+
+            <div class="cycle-step future">
+              <div class="cycle-node">7</div>
+              <div class="cycle-step-name">Plan Lock<br>&amp; Share</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── BENTO ROW 1 ── -->
+        <div class="bento">
+
+          <!-- OKR Donut -->
+          <div class="card bento-3">
+            <div class="card-header">
+              <p class="card-title">OKRs</p>
+              <span class="card-badge badge-blue">Q3 2026</span>
+            </div>
+            <div class="donut-card-body">
+              <div class="donut-wrap">
+                <svg class="donut-svg" width="90" height="90" viewBox="0 0 90 90">
+                  <!-- Track -->
+                  <circle cx="45" cy="45" r="36" fill="none" stroke="#f0f1f4" stroke-width="10"/>
+                  <!-- Non-functional (67%) -->
+                  <circle cx="45" cy="45" r="36" fill="none" stroke="#EDF1FD" stroke-width="10"
+                    stroke-dasharray="226 0"
+                    stroke-dashoffset="0"
+                    class="donut-ring" data-pct="100"/>
+                  <!-- Functional (33%) -->
+                  <circle cx="45" cy="45" r="36" fill="none" stroke="#204ECF" stroke-width="10"
+                    stroke-dasharray="0 226"
+                    stroke-dashoffset="0"
+                    class="donut-ring" data-pct="33"/>
+                </svg>
+                <div class="donut-center">
+                  <span class="donut-center-num" data-count="15">15</span>
+                  <span class="donut-center-label">total</span>
+                </div>
+              </div>
+              <div class="donut-legend">
+                <div class="donut-legend-item">
+                  <div class="legend-dot" style="background:#204ECF"></div>
+                  <span class="legend-label">Functional</span>
+                  <span class="legend-val">5</span>
+                </div>
+                <div class="donut-legend-item">
+                  <div class="legend-dot" style="background:#EDF1FD;border:1.5px solid #c0cef5"></div>
+                  <span class="legend-label">Non-functional</span>
+                  <span class="legend-val">10</span>
+                </div>
+                <div style="height:1px;background:#f0f1f4;margin:2px 0"></div>
+                <div class="donut-legend-item">
+                  <div class="legend-dot" style="background:#03B080"></div>
+                  <span class="legend-label">Avg progress</span>
+                  <span class="legend-val" style="color:#03B080">62%</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="resource-meter">
+                <div class="resource-meter-label"><span>Overall OKR health</span><span style="color:#03B080">Good</span></div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-green" style="width:62%;animation-delay:0.3s"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Initiatives Breakdown -->
+          <div class="card bento-3">
+            <div class="card-header">
+              <p class="card-title">Initiatives</p>
+              <span class="card-badge badge-blue">15 total</span>
+            </div>
+            <div class="ini-breakdown">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span class="ini-big-num" data-count="15">15</span>
+                <div class="ini-sub-row">
+                  <span class="ini-tag tag-new">12 NEW</span>
+                  <span class="ini-tag tag-rollover">3 ROLLOVER</span>
+                </div>
+              </div>
+              <div class="ini-derived">
+                <div class="ini-derived-item">
+                  <div class="ini-derived-num" data-count="55">55</div>
+                  <div class="ini-derived-label">Ideas generated</div>
+                </div>
+                <div class="ini-derived-item">
+                  <div class="ini-derived-num" data-count="25">25</div>
+                  <div class="ini-derived-label">ROB meetings</div>
+                </div>
+              </div>
+              <div>
+                <div class="resource-meter" style="margin-bottom:6px">
+                  <div class="resource-meter-label"><span>New</span><span>12</span></div>
+                  <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" style="width:80%;animation-delay:0.4s"></div></div>
+                </div>
+                <div class="resource-meter">
+                  <div class="resource-meter-label"><span>Rollover</span><span>3</span></div>
+                  <div class="meter-bar-bg"><div class="meter-bar-fill fill-yellow" style="width:20%;animation-delay:0.5s"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Focus (wide card) -->
+          <div class="card bento-6 today-card">
+            <div class="card-header">
+              <p class="card-title">Today's Schedule</p>
+              <div class="countdown-pill">
+                <div class="countdown-dot"></div>
+                Next in 24 min
+              </div>
+            </div>
+            <div class="today-timeline">
+
+              <div class="today-slot">
+                <div class="today-slot-line"></div>
+                <div class="today-time-col">
+                  <span class="today-time">9:00</span>
+                  <span class="today-ampm">AM</span>
+                </div>
+                <div class="today-dot-col">
+                  <div class="today-dot done"></div>
+                </div>
+                <div class="today-content">
+                  <p class="today-meeting-title">Finalize Initiatives &amp; Projects — Subfunction A</p>
+                  <div class="today-meta">
+                    <span class="today-func-tag">Subfunction A</span>
+                    <span class="today-duration">60 min · Done</span>
+                    <div class="today-participants" style="margin-left:auto">
+                      <div class="mini-avatar" style="background:#c8d0df;color:#455065">AJ</div>
+                      <div class="mini-avatar" style="background:#d0c8e0;color:#604090">SL</div>
+                      <div class="mini-avatar" style="background:#c0d0e0;color:#204ECF">MK</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="today-slot">
+                <div class="today-slot-line"></div>
+                <div class="today-time-col">
+                  <span class="today-time" style="color:#204ECF">10:15</span>
+                  <span class="today-ampm">AM</span>
+                </div>
+                <div class="today-dot-col">
+                  <div class="today-dot meeting"></div>
+                </div>
+                <div class="today-content">
+                  <p class="today-meeting-title">Sub-Functional OKR Review — Subfunction B</p>
+                  <div class="today-meta">
+                    <span class="today-func-tag">Subfunction B</span>
+                    <span class="today-duration">45 min · Up next</span>
+                    <div class="today-participants" style="margin-left:auto">
+                      <div class="mini-avatar" style="background:#c0e0d0;color:#036040">AL</div>
+                      <div class="mini-avatar" style="background:#d0c8e0;color:#604090">JP</div>
+                      <div class="mini-avatar" style="background:#f0e0c8;color:#804020">+4</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="today-slot">
+                <div class="today-time-col">
+                  <span class="today-time">2:00</span>
+                  <span class="today-ampm">PM</span>
+                </div>
+                <div class="today-dot-col">
+                  <div class="today-dot" style="border-color:#ebeced"></div>
+                </div>
+                <div class="today-content">
+                  <p class="today-meeting-title">Cross-Functional Alignment — Subfunction C</p>
+                  <div class="today-meta">
+                    <span class="today-func-tag" style="background:#EAFBF5;color:#03B080">Subfunction C</span>
+                    <span class="today-duration">30 min</span>
+                    <div class="today-participants" style="margin-left:auto">
+                      <div class="mini-avatar" style="background:#c8d0df;color:#455065">RL</div>
+                      <div class="mini-avatar" style="background:#c0d0e0;color:#204ECF">MK</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- /bento row 1 -->
+
+        <!-- ── BENTO ROW 2 ── -->
+        <div class="bento">
+
+          <!-- Resources card -->
+          <div class="card bento-4">
+            <div class="card-header">
+              <p class="card-title">Resources</p>
+              <span class="card-badge badge-yellow">5 needed</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px">
+              <span class="resources-big" data-count="25.3">25.3</span>
+              <span class="resources-unit">M value</span>
+            </div>
+            <div class="skill-chips">
+              <div class="skill-chip"><div class="skill-chip-dot"></div>Web Designer</div>
+              <div class="skill-chip"><div class="skill-chip-dot"></div>Software Eng.</div>
+              <div class="skill-chip"><div class="skill-chip-dot"></div>SEO Expert</div>
+              <div class="skill-chip"><div class="skill-chip-dot"></div>QA Manager</div>
+              <div class="skill-chip"><div class="skill-chip-dot"></div>Data Analyst</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="resource-meter">
+                <div class="resource-meter-label"><span>Budget allocated</span><span>68%</span></div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" style="width:68%;animation-delay:0.2s"></div></div>
+              </div>
+              <div class="resource-meter">
+                <div class="resource-meter-label"><span>Headcount filled</span><span style="color:#D42551">40%</span></div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-red" style="width:40%;animation-delay:0.35s"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects card -->
+          <div class="card bento-4">
+            <div class="card-header">
+              <p class="card-title">Top Projects</p>
+              <span class="card-badge badge-green">by score</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#191e28;margin-bottom:4px">
+                  <span>FP&amp;A Platform Migration</span><span style="color:#03B080">89</span>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-green" style="width:89%;animation-delay:0.1s"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#191e28;margin-bottom:4px">
+                  <span>Month-End Reconciliation Auto.</span><span style="color:#204ECF">76</span>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" style="width:76%;animation-delay:0.2s"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#191e28;margin-bottom:4px">
+                  <span>Variance Threshold Policy</span><span style="color:#204ECF">65</span>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" style="width:65%;animation-delay:0.3s"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#191e28;margin-bottom:4px">
+                  <span>Headcount Exception Process</span><span style="color:#E59C01">52</span>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-yellow" style="width:52%;animation-delay:0.4s"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#191e28;margin-bottom:4px">
+                  <span>Cross-Functional OKR Map</span><span style="color:#E59C01">41</span>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill fill-yellow" style="width:41%;animation-delay:0.5s"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slack / Comms card -->
+          <div class="card bento-4">
+            <div class="card-header">
+              <p class="card-title">Slack Channels</p>
+              <span class="card-badge badge-green">13 active</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f8f9fb;border-radius:6px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><rect x="4" y="4" width="6" height="6" rx="1.5" fill="#E01E5A"/><rect x="14" y="4" width="6" height="6" rx="1.5" fill="#ECB22E"/><rect x="4" y="14" width="6" height="6" rx="1.5" fill="#2EB67D"/><rect x="14" y="14" width="6" height="6" rx="1.5" fill="#36C5F0"/></svg>
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#191e28">#fin-q3-planning</div>
+                    <div style="font-size:10px;color:#999"><span class="slack-active-dot"></span>42 members · 12 new msgs</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f8f9fb;border-radius:6px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><rect x="4" y="4" width="6" height="6" rx="1.5" fill="#E01E5A"/><rect x="14" y="4" width="6" height="6" rx="1.5" fill="#ECB22E"/><rect x="4" y="14" width="6" height="6" rx="1.5" fill="#2EB67D"/><rect x="14" y="14" width="6" height="6" rx="1.5" fill="#36C5F0"/></svg>
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#191e28">#okr-review-team</div>
+                    <div style="font-size:10px;color:#999"><span class="slack-active-dot"></span>18 members · 3 new msgs</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f8f9fb;border-radius:6px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><rect x="4" y="4" width="6" height="6" rx="1.5" fill="#E01E5A"/><rect x="14" y="4" width="6" height="6" rx="1.5" fill="#ECB22E"/><rect x="4" y="14" width="6" height="6" rx="1.5" fill="#2EB67D"/><rect x="14" y="14" width="6" height="6" rx="1.5" fill="#36C5F0"/></svg>
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#191e28">#initiatives-q3</div>
+                    <div style="font-size:10px;color:#999">28 members · quiet</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f8f9fb;border-radius:6px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><rect x="4" y="4" width="6" height="6" rx="1.5" fill="#E01E5A"/><rect x="14" y="4" width="6" height="6" rx="1.5" fill="#ECB22E"/><rect x="4" y="14" width="6" height="6" rx="1.5" fill="#2EB67D"/><rect x="14" y="14" width="6" height="6" rx="1.5" fill="#36C5F0"/></svg>
+                  <div>
+                    <div style="font-size:11px;font-weight:600;color:#191e28">#fpa-platform-project</div>
+                    <div style="font-size:10px;color:#999"><span class="slack-active-dot"></span>11 members · 7 new msgs</div>
+                  </div>
+                </div>
+              </div>
+              <a href="#" style="font-size:11px;font-weight:600;color:#204ECF;text-decoration:none;text-align:center;padding:4px;display:block">View all 13 channels →</a>
+            </div>
+          </div>
+
+        </div><!-- /bento row 2 -->
+
+        <!-- ── DETAIL LISTS ── -->
+        <div class="detail-grid">
+
+          <!-- Initiatives list -->
+          <div class="card list-card" style="padding:0">
+            <div class="list-card-header">
+              <span class="list-card-title">Initiatives</span>
+              <span class="list-count">15</span>
+            </div>
+            <div class="list-items">
+              <div class="list-item">
+                <div class="list-item-icon icon-blue">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#204ECF" stroke-width="1.5" stroke-linecap="round"><path d="M8 2c0 0 4 2 4 6c0 2.5-2 4-2 4L8 14l-2-2s-2-1.5-2-4c0-4 4-6 4-6z"/><circle cx="8" cy="8" r="1.5" fill="#204ECF" stroke="none"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Automate month-end reconciliation workflows</p>
+                  <p class="list-item-meta">OKR: Automated coverage above 80%</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-blue">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#204ECF" stroke-width="1.5" stroke-linecap="round"><path d="M8 2c0 0 4 2 4 6c0 2.5-2 4-2 4L8 14l-2-2s-2-1.5-2-4c0-4 4-6 4-6z"/><circle cx="8" cy="8" r="1.5" fill="#204ECF" stroke="none"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Migrate to new FP&amp;A platform</p>
+                  <p class="list-item-meta">OKR: Migration fully completed Q3</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-blue">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#204ECF" stroke-width="1.5" stroke-linecap="round"><path d="M8 2c0 0 4 2 4 6c0 2.5-2 4-2 4L8 14l-2-2s-2-1.5-2-4c0-4 4-6 4-6z"/><circle cx="8" cy="8" r="1.5" fill="#204ECF" stroke="none"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Variance threshold escalation policy</p>
+                  <p class="list-item-meta">OKR: Reduce manual overrides by 60%</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-blue">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#204ECF" stroke-width="1.5" stroke-linecap="round"><path d="M8 2c0 0 4 2 4 6c0 2.5-2 4-2 4L8 14l-2-2s-2-1.5-2-4c0-4 4-6 4-6z"/><circle cx="8" cy="8" r="1.5" fill="#204ECF" stroke="none"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Headcount freeze exception process</p>
+                  <p class="list-item-meta">OKR: Hiring plan approved by Q3 start</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-blue">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#204ECF" stroke-width="1.5" stroke-linecap="round"><path d="M8 2c0 0 4 2 4 6c0 2.5-2 4-2 4L8 14l-2-2s-2-1.5-2-4c0-4 4-6 4-6z"/><circle cx="8" cy="8" r="1.5" fill="#204ECF" stroke="none"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Cross-functional OKR dependency map</p>
+                  <p class="list-item-meta">OKR: All Q3 OKRs finalized July 1</p>
+                </div>
+              </div>
+            </div>
+            <a href="#" class="view-all">View all 15 →</a>
+          </div>
+
+          <!-- Projects list -->
+          <div class="card list-card" style="padding:0">
+            <div class="list-card-header">
+              <span class="list-card-title">Projects</span>
+              <span class="list-count">16</span>
+            </div>
+            <div class="list-items">
+              <div class="list-item">
+                <div class="list-item-icon icon-green">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#03B080" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="5" height="5" rx="0.5"/><rect x="9" y="2" width="5" height="5" rx="0.5"/><rect x="2" y="9" width="5" height="5" rx="0.5"/><rect x="9" y="9" width="5" height="5" rx="0.5"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">FP&amp;A Platform Migration</p>
+                  <p class="list-item-meta">Composite score: 89.2</p>
+                </div>
+                <span class="list-item-score" style="color:#03B080">89</span>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-green">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#03B080" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="5" height="5" rx="0.5"/><rect x="9" y="2" width="5" height="5" rx="0.5"/><rect x="2" y="9" width="5" height="5" rx="0.5"/><rect x="9" y="9" width="5" height="5" rx="0.5"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Month-End Reconciliation Automation</p>
+                  <p class="list-item-meta">Composite score: 76.1</p>
+                </div>
+                <span class="list-item-score" style="color:#204ECF">76</span>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-green">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#03B080" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="5" height="5" rx="0.5"/><rect x="9" y="2" width="5" height="5" rx="0.5"/><rect x="2" y="9" width="5" height="5" rx="0.5"/><rect x="9" y="9" width="5" height="5" rx="0.5"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Budget Reforecast Automation</p>
+                  <p class="list-item-meta">Composite score: 65.0</p>
+                </div>
+                <span class="list-item-score">65</span>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-green">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#03B080" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="5" height="5" rx="0.5"/><rect x="9" y="2" width="5" height="5" rx="0.5"/><rect x="2" y="9" width="5" height="5" rx="0.5"/><rect x="9" y="9" width="5" height="5" rx="0.5"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Headcount Exception Workflow</p>
+                  <p class="list-item-meta">Composite score: 52.3</p>
+                </div>
+                <span class="list-item-score">52</span>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon icon-green">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="#03B080" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="5" height="5" rx="0.5"/><rect x="9" y="2" width="5" height="5" rx="0.5"/><rect x="2" y="9" width="5" height="5" rx="0.5"/><rect x="9" y="9" width="5" height="5" rx="0.5"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">Cross-team OKR Alignment Sprint</p>
+                  <p class="list-item-meta">Composite score: 41.7</p>
+                </div>
+                <span class="list-item-score">41</span>
+              </div>
+            </div>
+            <a href="#" class="view-all">View all 16 →</a>
+          </div>
+
+          <!-- ROB Meetings -->
+          <div class="card list-card" style="padding:0">
+            <div class="list-card-header">
+              <span class="list-card-title">ROB Meetings</span>
+              <span class="list-count">25</span>
+            </div>
+            <div class="list-items">
+              <div class="list-item">
+                <div class="list-item-body">
+                  <p class="list-item-title">Finalize Initiatives — Subfunction A</p>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;background:#EDF1FD;color:#204ECF;padding:1px 5px;border-radius:3px">Subfunction A</span>
+                  </div>
+                </div>
+                <div class="meeting-time-badge">
+                  <span class="meeting-time-text">9:00 AM</span>
+                  <span class="meeting-time-date">Today</span>
+                  <div class="meeting-today-dot"></div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-body">
+                  <p class="list-item-title">Sub-Functional OKR Review — Subfunction B</p>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;background:#EDF1FD;color:#204ECF;padding:1px 5px;border-radius:3px">Subfunction B</span>
+                  </div>
+                </div>
+                <div class="meeting-time-badge">
+                  <span class="meeting-time-text">10:15 AM</span>
+                  <span class="meeting-time-date">Today</span>
+                  <div class="meeting-today-dot"></div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-body">
+                  <p class="list-item-title">Cross-Functional Alignment — Subfunction C</p>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;background:#EDF1FD;color:#204ECF;padding:1px 5px;border-radius:3px">Subfunction C</span>
+                  </div>
+                </div>
+                <div class="meeting-time-badge">
+                  <span class="meeting-time-text">2:00 PM</span>
+                  <span class="meeting-time-date">Today</span>
+                  <div class="meeting-today-dot"></div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-body">
+                  <p class="list-item-title">OKR Review — Finance Leadership</p>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;background:#f3f4f6;color:#455065;padding:1px 5px;border-radius:3px">All Teams</span>
+                  </div>
+                </div>
+                <div class="meeting-time-badge">
+                  <span class="meeting-time-text">9:00 AM</span>
+                  <span class="meeting-time-date">May 28</span>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-body">
+                  <p class="list-item-title">Initiative Planning Sync — Subfunction B</p>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;background:#f3f4f6;color:#455065;padding:1px 5px;border-radius:3px">Subfunction B</span>
+                  </div>
+                </div>
+                <div class="meeting-time-badge">
+                  <span class="meeting-time-text">11:00 AM</span>
+                  <span class="meeting-time-date">May 29</span>
+                </div>
+              </div>
+            </div>
+            <a href="#" class="view-all">View all 25 →</a>
+          </div>
+
+          <!-- Slack Channels detail -->
+          <div class="card list-card" style="padding:0">
+            <div class="list-card-header">
+              <span class="list-card-title">Slack Channels</span>
+              <span class="list-count">13</span>
+            </div>
+            <div class="list-items">
+              <div class="list-item">
+                <div class="list-item-icon" style="background:#f3f4f6">
+                  <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="#E01E5A"/><rect x="9" y="2" width="5" height="5" rx="1" fill="#ECB22E"/><rect x="2" y="9" width="5" height="5" rx="1" fill="#2EB67D"/><rect x="9" y="9" width="5" height="5" rx="1" fill="#36C5F0"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">#fin-q3-planning</p>
+                  <p class="list-item-meta"><span class="slack-active-dot"></span>42 members · very active</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon" style="background:#f3f4f6">
+                  <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="#E01E5A"/><rect x="9" y="2" width="5" height="5" rx="1" fill="#ECB22E"/><rect x="2" y="9" width="5" height="5" rx="1" fill="#2EB67D"/><rect x="9" y="9" width="5" height="5" rx="1" fill="#36C5F0"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">#okr-review-team</p>
+                  <p class="list-item-meta"><span class="slack-active-dot"></span>18 members · active</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon" style="background:#f3f4f6">
+                  <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="#E01E5A"/><rect x="9" y="2" width="5" height="5" rx="1" fill="#ECB22E"/><rect x="2" y="9" width="5" height="5" rx="1" fill="#2EB67D"/><rect x="9" y="9" width="5" height="5" rx="1" fill="#36C5F0"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">#fpa-platform-project</p>
+                  <p class="list-item-meta"><span class="slack-active-dot"></span>11 members · active</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon" style="background:#f3f4f6">
+                  <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="#E01E5A"/><rect x="9" y="2" width="5" height="5" rx="1" fill="#ECB22E"/><rect x="2" y="9" width="5" height="5" rx="1" fill="#2EB67D"/><rect x="9" y="9" width="5" height="5" rx="1" fill="#36C5F0"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">#initiatives-q3</p>
+                  <p class="list-item-meta">28 members · quiet</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="list-item-icon" style="background:#f3f4f6">
+                  <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="#E01E5A"/><rect x="9" y="2" width="5" height="5" rx="1" fill="#ECB22E"/><rect x="2" y="9" width="5" height="5" rx="1" fill="#2EB67D"/><rect x="9" y="9" width="5" height="5" rx="1" fill="#36C5F0"/></svg>
+                </div>
+                <div class="list-item-body">
+                  <p class="list-item-title">#variance-policy-wg</p>
+                  <p class="list-item-meta">9 members · quiet</p>
+                </div>
+              </div>
+            </div>
+            <a href="#" class="view-all">View all 13 →</a>
+          </div>
+
+        </div><!-- /detail-grid -->
+
+      </div><!-- /page-content -->
+    </div><!-- /workspace -->
+  </main>
+</div>
+
+<script>
+  /* ── Sidenav toggle ── */
+  document.querySelectorAll('.sidenav-toggle').forEach(btn =>
+    btn.addEventListener('click', () => btn.closest('.sidenav').classList.toggle('is-compact')));
+
+  /* ── Animated donut rings ── */
+  function animateDonut() {
+    // OKR donut: functional 33%, track 226px circumference
+    const circles = document.querySelectorAll('.donut-ring');
+    circles.forEach(c => {
+      const pct = parseFloat(c.dataset.pct) / 100;
+      const circ = 2 * Math.PI * 36; // r=36
+      const fill = circ * pct;
+      const gap  = circ - fill;
+      const start = circ * 0; // start from top
+      c.style.transition = 'none';
+      c.setAttribute('stroke-dasharray', `0 ${circ}`);
+      c.setAttribute('stroke-dashoffset', '0');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          c.style.transition = 'stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1)';
+          c.setAttribute('stroke-dasharray', `${fill} ${gap}`);
+        });
+      });
+    });
+  }
+
+  /* ── Number count-up ── */
+  function countUp(el, target, duration = 1000) {
+    const isFloat = String(target).includes('.');
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = target * eased;
+      el.textContent = isFloat ? current.toFixed(1) : Math.round(current);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── Boot ── */
+  window.addEventListener('load', () => {
+    animateDonut();
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const val = parseFloat(el.dataset.count);
+      countUp(el, val, 900);
+    });
+  });
+</script>
+</body>
+</html>
